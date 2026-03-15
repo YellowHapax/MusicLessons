@@ -5,6 +5,39 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Music Lessons — Math Behind the Music</title>
     <meta name="description" content="An interactive 5-stage tutor teaching the mathematical foundations of music: semitones, frequency ratios, chords as vectors, Fibonacci rhythm, and harmonic synthesis." />
+    <meta name="keywords" content="music theory, equal temperament, frequency ratios, chord vectors, Fibonacci rhythm, harmonic synthesis, music math, interactive tutor, semitones, chromatic scale" />
+    <meta name="author" content="YellowHapax" />
+    <meta property="og:title" content="Music Lessons — Math Behind the Music" />
+    <meta property="og:description" content="An interactive 5-stage AI-assisted tutor covering semitones, frequency ratios, chords as vectors, Fibonacci rhythm, and harmonic synthesis. Powered by Claude Sonnet via OpenRouter." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://yellowhapax.github.io/MusicLessons/" />
+    <link rel="canonical" href="https://yellowhapax.github.io/MusicLessons/" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Music Lessons \u2014 Math Behind the Music",
+      "url": "https://yellowhapax.github.io/MusicLessons/",
+      "description": "An interactive 5-stage AI-assisted tutor teaching the mathematical foundations of music: 12-tone equal temperament, frequency ratios, chord vectors, Fibonacci rhythm, and harmonic synthesis. Each stage pairs a live visualization with an AI tutor powered by Claude Sonnet via OpenRouter.",
+      "applicationCategory": "EducationalApplication",
+      "operatingSystem": "Web browser",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+      "about": [
+        { "@type": "Thing", "name": "Music Theory" },
+        { "@type": "Thing", "name": "Equal Temperament" },
+        { "@type": "Thing", "name": "Frequency Ratios" },
+        { "@type": "Thing", "name": "Harmonic Series" },
+        { "@type": "Thing", "name": "Fibonacci Rhythm" }
+      ],
+      "featureList": [
+        "Stage 1: Numbers & Notes \u2014 piano keyboard, octave selector, frequency formula f=220\u00d72^(octave\u22123+semitone/12)",
+        "Stage 2: Intervals & Ratios \u2014 waveform canvas, consonance classification, 8 named intervals with ratios",
+        "Stage 3: Chords as Vectors \u2014 SVG chromatic clock, chord offset arrays, root rotation",
+        "Stage 4: Rhythm & Fibonacci \u2014 16-step grid, Fibonacci offsets [0,1,2,4,7,12], BPM to ms math",
+        "Stage 5: Synthesis & Hz Math \u2014 harmonic amplitude sliders, composite waveform canvas, BPM timing"
+      ]
+    }
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
@@ -26,9 +59,102 @@
         width: 100%;
         max-width: 860px;
       }
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0,0,0,0);
+        white-space: nowrap;
+        border: 0;
+      }
     </style>
   </head>
   <body>
+    <section class="sr-only" aria-label="Application description for screen readers and search crawlers">
+      <h1>Music Lessons &#8212; Math Behind the Music</h1>
+      <p>
+        An interactive 5-stage AI-assisted tutor that teaches the mathematical foundations of music.
+        Each stage pairs a live interactive visualization with an AI tutor (Claude Sonnet via OpenRouter)
+        that guides you through exercises and corrects your answers. Bring your own OpenRouter API key.
+      </p>
+
+      <section>
+        <h2>Stage 1: Numbers &amp; Notes</h2>
+        <p>
+          The chromatic scale has 12 semitones. Each semitone multiplies frequency by the twelfth root of 2
+          (approximately 1.0595). An octave doubles frequency exactly. The core formula is:
+          f = 220 &times; 2^(octave &minus; 3 + semitone / 12). An interactive piano keyboard lets you
+          select any octave (2&ndash;5), click any of the 12 semitone keys, and see the full frequency
+          formula and Hz value. Base frequency: A3 = 220 Hz; A4 = 440 Hz; A5 = 880 Hz.
+        </p>
+      </section>
+
+      <section>
+        <h2>Stage 2: Intervals &amp; Ratios</h2>
+        <p>
+          Two notes are consonant when their frequencies form a simple integer ratio.
+          A Perfect 5th (7 semitones) has ratio 3:2 &#8212; the simplest after the octave.
+          A Minor 2nd (1 semitone) has ratio 16:15, producing audible beating.
+          A canvas visualization draws the two sine waves side by side.
+          Intervals covered: Unison (1:1), Minor 2nd (16:15), Minor 3rd (6:5), Major 3rd (5:4),
+          Perfect 4th (4:3), Perfect 5th (3:2), Major 6th (5:3), Octave (2:1).
+        </p>
+      </section>
+
+      <section>
+        <h2>Stage 3: Chords as Vectors</h2>
+        <p>
+          A chord is a list of semitone offsets applied to a root note.
+          Minor = [0, 3, 7]. Major = [0, 4, 7]. Major 7 = [0, 4, 7, 11]. Minor 7 = [0, 3, 7, 10].
+          Pentatonic = [0, 2, 4, 7, 9]. The same shape rotates around the chromatic clock to
+          produce any chord in any key. An SVG clock diagram shows all 12 notes; active chord tones
+          are highlighted with connecting lines. Click any note to change the root.
+          This is how The Mountain music sequencer stores its chord progressions (Am/G/C/F).
+        </p>
+      </section>
+
+      <section>
+        <h2>Stage 4: Rhythm &amp; Fibonacci</h2>
+        <p>
+          A bar has 16 sixteenth-note steps. Rhythm is a set of active step indices.
+          Uniform 8th notes fill steps 0, 2, 4, 6, 8, 10, 12, 14 with even gaps.
+          Fibonacci rhythm uses offsets 0, 1, 2, 4, 7, 12 &#8212; gaps of 1, 1, 2, 3, 5 &#8212;
+          producing a dense cluster at the front that breathes out toward silence (Bach mode).
+          Euclidean rhythm distributes 5 hits as evenly as possible: steps 0, 3, 6, 9, 12.
+          BPM timing: 1 step = 60,000 ms &divide; BPM &divide; 4; at 110 BPM, 1 step &asymp; 136 ms.
+        </p>
+      </section>
+
+      <section>
+        <h2>Stage 5: Synthesis &amp; Hz Math</h2>
+        <p>
+          Real instrument tones are sums of harmonics &#8212; sine waves at integer multiples of a fundamental.
+          Sliders control the amplitude of the 1st (fundamental), 2nd (octave, 2&times;),
+          3rd (fifth up, 3&times;), and 4th (two octaves, 4&times;) harmonics.
+          A canvas waveform updates in real time to show the composite shape.
+          A BPM selector (60&ndash;160) displays 1-step, 1-bar, and 16-bar timings in milliseconds.
+          Reference: A4 = 440 Hz. The Mountain uses Web Audio OscillatorNode at pentatonic frequencies
+          with GainNode envelopes for attack and release.
+        </p>
+      </section>
+
+      <section>
+        <h2>AI Tutor</h2>
+        <p>
+          Each stage includes an AI chat panel powered by Claude Sonnet (OpenRouter model anthropic/claude-sonnet-4).
+          The tutor is aware of the current stage and The Mountain sequencer design.
+          It gives short 3&ndash;5 sentence replies, one exercise at a time, using physical language
+          to describe wave behavior. Type &#8220;next stage&#8221; to advance.
+          Quick-reply buttons: &#8220;Give me a hint&#8221;, &#8220;Show me the answer&#8221;, &#8220;Next stage &rarr;&#8221;.
+        </p>
+      </section>
+
+      <p>Full machine-readable specification: <a href="/MusicLessons/llms.txt">llms.txt</a></p>
+    </section>
+
     <div id="root"></div>
 
     <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>

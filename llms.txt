@@ -1,0 +1,172 @@
+# Music Lessons — Math Behind the Music
+> https://yellowhapax.github.io/MusicLessons/
+> Last updated: 2025
+
+An interactive 5-stage AI-assisted tutor that teaches the mathematical foundations of music:
+equal temperament, frequency ratios, chord vectors, Fibonacci rhythm, and harmonic synthesis.
+Each stage pairs a live interactive visualization with an AI tutor (Claude Sonnet, via OpenRouter)
+that guides learners through exercises and answers. Bring your own OpenRouter API key.
+
+## Application
+
+- **URL**: https://yellowhapax.github.io/MusicLessons/
+- **Type**: Single-page web app (React 18 UMD + Babel standalone)
+- **Theme**: Dark (--bg: #0a0a0f, --surface: #12121a, --surface2: #1a1a26)
+- **Fonts**: Inter (body/UI, weights 400/500/600), JetBrains Mono (code/formulas)
+- **AI backend**: OpenRouter `anthropic/claude-sonnet-4` — user supplies own key, stored in `localStorage` key `ml_or_key`
+- **Intended audience**: Musicians learning theory through math; developers building music sequencers; curious explorers
+
+---
+
+## Stage 1: Numbers & Notes  (accent #7F77DD)
+
+The chromatic scale contains 12 semitones. Each semitone multiplies frequency by ¹²√2 ≈ 1.0595.
+An octave (12 semitones) doubles frequency exactly.
+
+**Frequency formula**: `f = 220 × 2^(octave − 3 + semitone / 12)`
+
+- Base: A3 = 220 Hz; A4 = 440 Hz; A5 = 880 Hz
+- Note names (semitones 0–11): A, A#, B, C, C#, D, D#, E, F, F#, G, G#
+- Visualization: interactive piano keyboard (7 white keys + 5 black keys); octave selector (2–5);
+  click any key to display its full formula and Hz value; frequency bar chart shows doubling across octaves
+- Intro exercise: "A3 = 220 Hz. Without a calculator, estimate A5. What's the pattern?"
+
+---
+
+## Stage 2: Intervals & Ratios  (accent #1D9E75)
+
+Two notes are consonant when their frequencies form a simple integer ratio. Complex ratios
+produce audible beating (dissonance). Frequency multiplier for n semitones = 2^(n/12).
+
+**Interval table**:
+
+| Interval    | Semitones | Ratio | Quality       |
+|-------------|-----------|-------|---------------|
+| Unison      | 0         | 1:1   | consonant     |
+| Minor 2nd   | 1         | 16:15 | dissonant     |
+| Minor 3rd   | 3         | 6:5   | mildly tense  |
+| Major 3rd   | 4         | 5:4   | mildly tense  |
+| Perfect 4th | 5         | 4:3   | consonant     |
+| Perfect 5th | 7         | 3:2   | consonant     |
+| Major 6th   | 9         | 5:3   | mildly tense  |
+| Octave      | 12        | 2:1   | consonant     |
+
+- Visualization: canvas drawing two sine waves — root (1×) and selected interval (f₂ = 2^(semitones/12)×);
+  interval picker buttons; stat bar showing ratio, consonance feel, and exact frequency multiplier
+- Intro exercise: "Which interval has ratio 2:1? How many semitones? Why does it sound 'same but higher'?"
+
+---
+
+## Stage 3: Chords as Vectors  (accent #D85A30)
+
+A chord is a list of semitone offsets from a root note. The same shape applies to any root —
+the pattern rotates around the chromatic clock.
+
+**Chord definitions**:
+
+| Chord       | Offsets        | Notes with root = A       |
+|-------------|----------------|---------------------------|
+| Major       | [0, 4, 7]      | A, C#, E                  |
+| Minor       | [0, 3, 7]      | A, C, E                   |
+| Major 7     | [0, 4, 7, 11]  | A, C#, E, G#              |
+| Minor 7     | [0, 3, 7, 10]  | A, C, E, G                |
+| Pentatonic  | [0, 2, 4, 7, 9]| A, B, C#, E, F#           |
+
+- The Mountain connection: chord progressions Am/G/C/F; 7th extensions for color;
+  stored internally as `[root, offsets]` pairs
+- Visualization: SVG chromatic clock (12 nodes on circle); active chord tones highlighted;
+  vector lines connecting chord members; click any node to change root; 5 chord-type buttons
+- Intro exercise: "The Mountain uses Am, G, C, F. Find all four roots on the clock and identify
+  whether each is major or minor."
+
+---
+
+## Stage 4: Rhythm & Fibonacci  (accent #378ADD)
+
+A musical bar has 16 sixteenth-note steps. Rhythm = a set of active step indices.
+Three pattern modes demonstrate different mathematical principles.
+
+**Patterns**:
+
+| Mode       | Active Steps          | Gap sequence | Character                       |
+|------------|-----------------------|--------------|---------------------------------|
+| Uniform    | 0,2,4,6,8,10,12,14   | all 2s       | metronomic, predictable         |
+| Fibonacci  | 0,1,2,4,7,12         | 1,1,2,3,5    | dense cluster then long breath  |
+| Euclidean  | 0,3,6,9,12           | all 3s       | maximally even, slightly off-grid|
+
+**BPM timing**:
+- 1 step (16th note) = 60,000 ms ÷ BPM ÷ 4
+- 1 bar = 60,000 ms ÷ BPM
+- At 110 BPM: 1 step ≈ 136 ms; 1 bar ≈ 545 ms
+
+- The Mountain connection: Fibonacci mode is "Bach mode" — dense onset cluster that breathes out
+- Visualization: 16-cell step grid (active = blue, inactive = surface2); pattern picker; live BPM math display
+- Intro exercise: "At 110 BPM, how long is one step? How long is the full 16-bar grid?"
+
+---
+
+## Stage 5: Synthesis & Hz Math  (accent #EF9F27)
+
+Real instrument tones are sums of sine waves at integer multiples of a fundamental (harmonics).
+Adding harmonics thickens and brightens a pure sine wave.
+
+**Harmonic series**:
+
+| Harmonic          | Frequency | Interval above fundamental |
+|-------------------|-----------|----------------------------|
+| 1st (fundamental) | f         | —                          |
+| 2nd               | 2f        | Octave                     |
+| 3rd               | 3f        | Octave + Perfect 5th       |
+| 4th               | 4f        | Two octaves                |
+
+**BPM–time relationships**:
+- 1 step = 60,000 ÷ (BPM × 4) ms
+- 1 bar = 60,000 ÷ BPM ms
+- A4 = 440 Hz (standard concert pitch)
+
+- The Mountain connection: Web Audio OscillatorNode at pentatonic scale frequencies;
+  GainNode envelopes for attack/release; harmonic shaping sets timbre
+- Visualization: canvas composite waveform (updates in real time as sliders change);
+  four amplitude sliders (harmonics 1–4, range 0–1); BPM selector (60–160);
+  stat bar showing 1-step, 1-bar, and 16-bar timings plus A4 = 440 Hz reference
+- Intro exercise: "Set BPM to 120. What is 1 step in ms? At 60 BPM? What's the relationship?"
+
+---
+
+## AI Tutor System
+
+- **Model**: `anthropic/claude-sonnet-4` via `https://openrouter.ai/api/v1/chat/completions`
+- **Max tokens**: 1000
+- **Persona**: Music math tutor anchored to "The Mountain" music sequencer design
+- **Response style**: 3–5 sentences; one exercise at a time; physical/sensory language
+  ("the waves lock together", "the gap breathes"); code in triple backticks
+- **Stage awareness**: System prompt contains current stage title and number (1–5);
+  covers all 5 stage topics explicitly
+- **Advancing stages**: Any message matching `/\b(next|advance|next stage|move on)\b/i`
+  triggers stage increment with a 350 ms delay (smooth transition)
+- **Quick replies**: "Give me a hint", "Show me the answer", "Next stage →"
+- **Auth**: User pastes OpenRouter key into input; saved to `localStorage["ml_or_key"]`
+
+---
+
+## Tech Stack
+
+- React 18 (UMD, `unpkg.com/react@18/umd/react.production.min.js`)
+- ReactDOM 18 (UMD, `unpkg.com/react-dom@18/umd/react-dom.production.min.js`)
+- Babel standalone (`unpkg.com/@babel/standalone/babel.min.js`) — JSX compiled in-browser
+- Inter (Google Fonts, weights 400/500/600)
+- JetBrains Mono (Google Fonts, weights 400/500)
+- No build step — single `index.html`, no npm, no bundler
+
+---
+
+## Design Notes
+
+- Dark palette: background `#0a0a0f`, surface `#12121a`, surface2 `#1a1a26`, border `#2a2a3e`,
+  text `#e0e4f0`, muted `#7a80a0`
+- Max width 860px, centered; flex layouts with `flexWrap` for narrow-viewport adaptation
+- Stage tabs use each stage's accent color when active; inactive tabs are surface2
+- Stage change inserts a separator banner in the chat log
+- Canvas elements use `useEffect` + `useRef` for imperative 2D drawing (waveforms, chord clock)
+- Piano keyboard: white keys 34px wide × 80px tall; black keys 22px wide × 52px tall;
+  Z-index 2 on black keys; click handler on all keys
