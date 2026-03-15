@@ -1,0 +1,583 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Music Lessons — Math Behind the Music</title>
+    <meta name="description" content="An interactive 5-stage tutor teaching the mathematical foundations of music: semitones, frequency ratios, chords as vectors, Fibonacci rhythm, and harmonic synthesis." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <style>
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+      :root {
+        --font-sans: 'Inter', system-ui, sans-serif;
+        --font-mono: 'JetBrains Mono', 'Fira Mono', monospace;
+      }
+      html, body {
+        min-height: 100%;
+        background: #0a0a0f;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px 16px;
+      }
+      #root {
+        width: 100%;
+        max-width: 860px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <script type="text/babel" data-presets="react">
+      const { useState, useRef, useEffect } = React;
+
+      const D = {
+        bg: "#0a0a0f", surface: "#12121a", surface2: "#1a1a26",
+        border: "#2a2a3e", text: "#e0e4f0", muted: "#7a80a0", hint: "#44485e",
+      };
+
+      const STAGES = [
+        { id: 1, title: "Numbers & Notes",      color: "#7F77DD" },
+        { id: 2, title: "Intervals & Ratios",   color: "#1D9E75" },
+        { id: 3, title: "Chords as Vectors",    color: "#D85A30" },
+        { id: 4, title: "Rhythm & Fibonacci",   color: "#378ADD" },
+        { id: 5, title: "Synthesis & Hz Math",  color: "#EF9F27" },
+      ];
+
+      const NOTE_NAMES = ["A","A#","B","C","C#","D","D#","E","F","F#","G","G#"];
+      const BASE_FREQ = 220;
+
+      function Stage1Visual() {
+        const [octave, setOctave] = useState(3);
+        const [selected, setSelected] = useState(null);
+
+        const notes = NOTE_NAMES.map((n, i) => ({
+          name: n, semitone: i,
+          freq: (BASE_FREQ * Math.pow(2, octave - 3) * Math.pow(2, i / 12)).toFixed(1),
+          isBlack: n.includes("#"),
+        }));
+        const white = notes.filter(n => !n.isBlack);
+        const black = notes.filter(n => n.isBlack);
+        const blackPos = { 1:1, 4:3, 6:4, 9:6, 11:7 };
+
+        return (
+          <div style={{ padding: "14px 0 8px" }}>
+            <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 12 }}>
+              <span style={{ fontSize: 12, color: D.muted }}>Octave:</span>
+              {[2,3,4,5].map(o => (
+                <button key={o} onClick={() => setOctave(o)} style={{
+                  padding: "3px 10px", borderRadius: 12, fontSize: 12, cursor: "pointer",
+                  background: o === octave ? "#7F77DD" : D.surface2,
+                  color: o === octave ? "#fff" : D.muted,
+                  border: `1px solid ${D.border}`,
+                }}>{o}</button>
+              ))}
+              <span style={{ fontSize: 12, color: D.muted, marginLeft: 8 }}>
+                A{octave} = {(BASE_FREQ * Math.pow(2, octave - 3)).toFixed(0)} Hz
+                <span style={{ color: "#7F77DD" }}> (×{Math.pow(2, octave - 3)})</span>
+              </span>
+            </div>
+
+            <div style={{ position: "relative", height: 90, userSelect: "none" }}>
+              {white.map((n, i) => (
+                <div key={n.name} onClick={() => setSelected(n)} style={{
+                  position: "absolute", left: i * 36, width: 34, height: 80,
+                  background: selected && selected.semitone === n.semitone ? "#c8c4f8" : "#dde0f0",
+                  border: `1px solid ${D.border}`, borderRadius: "0 0 4px 4px",
+                  display: "flex", flexDirection: "column", alignItems: "center",
+                  justifyContent: "flex-end", paddingBottom: 4, cursor: "pointer",
+                }}>
+                  <span style={{ fontSize: 10, color: "#333", fontWeight: 500 }}>{n.name}{octave}</span>
+                  <span style={{ fontSize: 9, color: "#666" }}>{n.semitone}</span>
+                </div>
+              ))}
+              {black.map((n) => {
+                const slot = blackPos[n.semitone];
+                return (
+                  <div key={n.name} onClick={() => setSelected(n)} style={{
+                    position: "absolute", left: slot * 36 - 10, width: 22, height: 52, zIndex: 2,
+                    background: selected && selected.semitone === n.semitone ? "#5a5580" : "#1a1828",
+                    border: "1px solid #555", borderRadius: "0 0 3px 3px", cursor: "pointer",
+                    display: "flex", flexDirection: "column", alignItems: "center",
+                    justifyContent: "flex-end", paddingBottom: 3,
+                  }}>
+                    <span style={{ fontSize: 9, color: "#aaa" }}>{n.semitone}</span>
+                  </div>
+                );
+              })}
+            </div>
+
+            {selected ? (
+              <div style={{ marginTop: 10, padding: "8px 12px", background: D.surface2, borderRadius: 8, border: `1px solid ${D.border}`, fontSize: 13 }}>
+                <span style={{ color: "#7F77DD", fontWeight: 500 }}>{selected.name}{octave}</span>
+                <span style={{ color: D.muted }}> · semitone {selected.semitone} · </span>
+                <span style={{ color: D.text }}>{selected.freq} Hz</span>
+                <span style={{ color: D.hint }}> = 220 × 2^({octave - 3} + {selected.semitone}/12)</span>
+              </div>
+            ) : (
+              <div style={{ marginTop: 10, padding: "8px 12px", background: D.surface2, borderRadius: 8, border: `1px solid ${D.border}`, fontSize: 13, color: D.hint }}>
+                Click any key to see its frequency formula.
+              </div>
+            )}
+
+            <div style={{ marginTop: 10, display: "flex", gap: 6, flexWrap: "wrap" }}>
+              {[2,3,4,5].map(o => (
+                <div key={o} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  <div style={{ width: Math.min((BASE_FREQ * Math.pow(2, o-3)) / 14, 120), height: 14, background: "#7F77DD", opacity: 0.3 + o * 0.15, borderRadius: 2 }} />
+                  <span style={{ fontSize: 11, color: D.muted }}>A{o} {(BASE_FREQ * Math.pow(2, o-3)).toFixed(0)}Hz</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      }
+
+      function Stage2Visual() {
+        const canvasRef = useRef(null);
+        const [intervalVal, setIntervalVal] = useState(7);
+        const intervals = [
+          { semitones: 0,  name: "Unison",      ratio: "1:1"   },
+          { semitones: 1,  name: "Minor 2nd",   ratio: "16:15" },
+          { semitones: 3,  name: "Minor 3rd",   ratio: "6:5"   },
+          { semitones: 4,  name: "Major 3rd",   ratio: "5:4"   },
+          { semitones: 5,  name: "Perfect 4th", ratio: "4:3"   },
+          { semitones: 7,  name: "Perfect 5th", ratio: "3:2"   },
+          { semitones: 9,  name: "Major 6th",   ratio: "5:3"   },
+          { semitones: 12, name: "Octave",      ratio: "2:1"   },
+        ];
+        const chosen = intervals.find(i => i.semitones === intervalVal) || intervals[5];
+        const f2 = Math.pow(2, intervalVal / 12);
+        const consonance = [0,5,7,12].includes(intervalVal) ? "consonant" : intervalVal === 1 ? "dissonant" : "mildly tense";
+
+        useEffect(() => {
+          const c = canvasRef.current; if (!c) return;
+          const ctx = c.getContext("2d");
+          const W = c.width, H = c.height;
+          ctx.clearRect(0, 0, W, H);
+          ctx.fillStyle = D.bg; ctx.fillRect(0, 0, W, H);
+          const drawWave = (freq, color, yOff) => {
+            ctx.beginPath(); ctx.strokeStyle = color; ctx.lineWidth = 2;
+            for (let x = 0; x < W; x++) {
+              const y = yOff + Math.sin((x / W) * 4 * Math.PI * freq) * 28;
+              x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+          };
+          drawWave(1,  "#7F77DD", H / 3);
+          drawWave(f2, "#1D9E75", 2 * H / 3);
+          ctx.fillStyle = D.hint; ctx.font = "11px monospace";
+          ctx.fillText("root (1×)", 6, H / 3 - 32);
+          ctx.fillText(`+${intervalVal} semitones (${f2.toFixed(3)}×)`, 6, 2 * H / 3 - 32);
+        }, [intervalVal, f2]);
+
+        return (
+          <div style={{ padding: "14px 0 8px" }}>
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 10 }}>
+              {intervals.map(iv => (
+                <button key={iv.semitones} onClick={() => setIntervalVal(iv.semitones)} style={{
+                  padding: "4px 10px", borderRadius: 12, fontSize: 11, cursor: "pointer",
+                  background: intervalVal === iv.semitones ? "#1D9E75" : D.surface2,
+                  color: intervalVal === iv.semitones ? "#fff" : D.muted,
+                  border: `1px solid ${D.border}`,
+                }}>{iv.name}</button>
+              ))}
+            </div>
+            <canvas ref={canvasRef} width={520} height={120} style={{ width: "100%", borderRadius: 8, border: `1px solid ${D.border}` }} />
+            <div style={{ marginTop: 8, padding: "8px 12px", background: D.surface2, borderRadius: 8, border: `1px solid ${D.border}`, fontSize: 13, display: "flex", gap: 16, flexWrap: "wrap" }}>
+              <span><span style={{ color: D.muted }}>interval </span><span style={{ color: "#1D9E75", fontWeight: 500 }}>{chosen.name}</span></span>
+              <span><span style={{ color: D.muted }}>ratio </span><span style={{ color: D.text }}>{chosen.ratio}</span></span>
+              <span><span style={{ color: D.muted }}>feel </span><span style={{ color: consonance === "consonant" ? "#1D9E75" : consonance === "dissonant" ? "#D85A30" : "#EF9F27" }}>{consonance}</span></span>
+              <span><span style={{ color: D.muted }}>freq × </span><span style={{ color: D.text }}>{f2.toFixed(4)}</span></span>
+            </div>
+          </div>
+        );
+      }
+
+      function Stage3Visual() {
+        const [root, setRoot] = useState(0);
+        const [chordType, setChordType] = useState("minor");
+        const chords = {
+          "major":      { intervals: [0,4,7],     label: "Major",      color: "#EF9F27" },
+          "minor":      { intervals: [0,3,7],     label: "Minor",      color: "#7F77DD" },
+          "major7":     { intervals: [0,4,7,11],  label: "Maj7",       color: "#1D9E75" },
+          "minor7":     { intervals: [0,3,7,10],  label: "Min7",       color: "#378ADD" },
+          "pentatonic": { intervals: [0,2,4,7,9], label: "Pentatonic", color: "#D85A30" },
+        };
+        const chord = chords[chordType];
+        const active = new Set(chord.intervals.map(i => (root + i) % 12));
+        const cx = 90, cy = 90, r = 68, dotR = 11;
+
+        return (
+          <div style={{ padding: "14px 0 8px", display: "flex", gap: 16, flexWrap: "wrap", alignItems: "flex-start" }}>
+            <div>
+              <svg width={180} height={180}>
+                <circle cx={cx} cy={cy} r={r} fill="none" stroke={D.border} strokeWidth={1} />
+                {NOTE_NAMES.map((n, i) => {
+                  const angle = (i / 12) * 2 * Math.PI - Math.PI / 2;
+                  const x = cx + r * Math.cos(angle), y = cy + r * Math.sin(angle);
+                  const isActive = active.has(i), isRoot = i === root;
+                  return (
+                    <g key={i} onClick={() => setRoot(i)} style={{ cursor: "pointer" }}>
+                      <circle cx={x} cy={y} r={dotR}
+                        fill={isRoot ? chord.color : isActive ? chord.color + "66" : D.surface2}
+                        stroke={isActive ? chord.color : D.border} strokeWidth={isActive ? 1.5 : 1} />
+                      <text x={x} y={y + 4} textAnchor="middle" fontSize={9} fill={isActive ? "#fff" : D.muted}>{n}</text>
+                    </g>
+                  );
+                })}
+                {[...active].sort((a,b)=>a-b).map((i, idx, arr) => {
+                  if (idx === arr.length - 1) return null;
+                  const a1 = (i / 12) * 2 * Math.PI - Math.PI / 2;
+                  const a2 = (arr[idx+1] / 12) * 2 * Math.PI - Math.PI / 2;
+                  return <line key={idx}
+                    x1={cx + r * Math.cos(a1)} y1={cy + r * Math.sin(a1)}
+                    x2={cx + r * Math.cos(a2)} y2={cy + r * Math.sin(a2)}
+                    stroke={chord.color} strokeWidth={1} opacity={0.4} />;
+                })}
+              </svg>
+              <div style={{ fontSize: 11, color: D.muted, textAlign: "center" }}>click any note = new root</div>
+            </div>
+            <div style={{ flex: 1, minWidth: 160 }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 12 }}>
+                {Object.entries(chords).map(([k, v]) => (
+                  <button key={k} onClick={() => setChordType(k)} style={{
+                    padding: "5px 12px", borderRadius: 8, fontSize: 12, cursor: "pointer", textAlign: "left",
+                    background: chordType === k ? v.color + "33" : D.surface2,
+                    color: chordType === k ? v.color : D.muted,
+                    border: `1px solid ${chordType === k ? v.color : D.border}`,
+                  }}>{v.label} [{v.intervals.join(", ")}]</button>
+                ))}
+              </div>
+              <div style={{ padding: "8px 12px", background: D.surface2, borderRadius: 8, border: `1px solid ${D.border}`, fontSize: 12 }}>
+                <div style={{ color: D.muted, marginBottom: 4 }}>notes in chord:</div>
+                <div style={{ color: chord.color, fontWeight: 500, letterSpacing: 1 }}>
+                  {[...active].sort((a,b)=>a-b).map(i => NOTE_NAMES[i]).join(" · ")}
+                </div>
+                <div style={{ color: D.hint, marginTop: 4, fontFamily: "var(--font-mono)", fontSize: 11 }}>
+                  root={NOTE_NAMES[root]} offsets=[{chord.intervals.join(",")}]
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      function Stage4Visual() {
+        const [mode, setMode] = useState("uniform");
+        const patterns = {
+          uniform:    new Set([0,2,4,6,8,10,12,14]),
+          fibonacci:  new Set([0,1,2,4,7,12]),
+          euclidean:  new Set([0,3,6,9,12]),
+        };
+        const active = patterns[mode];
+
+        return (
+          <div style={{ padding: "14px 0 8px" }}>
+            <div style={{ display: "flex", gap: 6, marginBottom: 12 }}>
+              {["uniform","fibonacci","euclidean"].map(m => (
+                <button key={m} onClick={() => setMode(m)} style={{
+                  padding: "4px 12px", borderRadius: 12, fontSize: 12, cursor: "pointer",
+                  background: mode === m ? "#378ADD" : D.surface2,
+                  color: mode === m ? "#fff" : D.muted,
+                  border: `1px solid ${D.border}`,
+                }}>{m}</button>
+              ))}
+            </div>
+            <div style={{ display: "flex", gap: 3, flexWrap: "nowrap" }}>
+              {Array.from({ length: 16 }, (_, i) => (
+                <div key={i} style={{
+                  flex: 1, height: 44, borderRadius: 4,
+                  background: active.has(i) ? "#378ADD" : D.surface2,
+                  border: `1px solid ${active.has(i) ? "#378ADD" : D.border}`,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  opacity: active.has(i) ? 1 : 0.35,
+                }}>
+                  <span style={{ fontSize: 10, color: active.has(i) ? "#fff" : D.hint }}>{i}</span>
+                </div>
+              ))}
+            </div>
+            <div style={{ marginTop: 10, padding: "8px 12px", background: D.surface2, borderRadius: 8, border: `1px solid ${D.border}`, fontSize: 12 }}>
+              {mode === "uniform"    && <span style={{ color: D.muted }}>Even 8th notes — steps <span style={{ color: "#378ADD" }}>{[...patterns.uniform].join(", ")}</span>. Predictable, metronomic.</span>}
+              {mode === "fibonacci"  && <span style={{ color: D.muted }}>Fibonacci offsets <span style={{ color: "#378ADD" }}>0, 1, 2, 4, 7, 12</span> — gaps: 1, 1, 2, 3, 5. Dense at front, then breathes. This is Bach mode in The Mountain.</span>}
+              {mode === "euclidean"  && <span style={{ color: D.muted }}>5 hits spread as evenly as possible across 16 steps — <span style={{ color: "#378ADD" }}>0, 3, 6, 9, 12</span>. Maximally even, slightly off-grid feel.</span>}
+            </div>
+            <div style={{ marginTop: 8, fontSize: 11, color: D.hint }}>
+              At 110 BPM: 1 step = {(60000 / 110 / 4).toFixed(0)}ms · 1 bar = {(60000 / 110).toFixed(0)}ms
+            </div>
+          </div>
+        );
+      }
+
+      function Stage5Visual() {
+        const canvasRef = useRef(null);
+        const [harmonics, setHarmonics] = useState([1, 0, 0, 0]);
+        const [bpm, setBpm] = useState(110);
+
+        useEffect(() => {
+          const c = canvasRef.current; if (!c) return;
+          const ctx = c.getContext("2d");
+          const W = c.width, H = c.height, mid = H / 2;
+          ctx.clearRect(0, 0, W, H);
+          ctx.fillStyle = "#050508"; ctx.fillRect(0, 0, W, H);
+          ctx.strokeStyle = D.border; ctx.lineWidth = 0.5;
+          ctx.beginPath(); ctx.moveTo(0, mid); ctx.lineTo(W, mid); ctx.stroke();
+          const norm = harmonics.reduce((s, a, i) => s + (a > 0 ? 1 / (i + 1) : 0), 0) || 1;
+          ctx.beginPath(); ctx.strokeStyle = "#EF9F27"; ctx.lineWidth = 2;
+          for (let x = 0; x < W; x++) {
+            const t = (x / W) * 2 * Math.PI * 3;
+            let y = 0;
+            harmonics.forEach((amp, i) => { if (amp > 0) y += amp * Math.sin(t * (i + 1)) / (i + 1); });
+            const py = mid - (y / norm) * (mid - 10);
+            x === 0 ? ctx.moveTo(x, py) : ctx.lineTo(x, py);
+          }
+          ctx.stroke();
+        }, [harmonics]);
+
+        const labels = ["1st (fundamental)", "2nd (octave)", "3rd (fifth up)", "4th (2 octaves)"];
+
+        return (
+          <div style={{ padding: "14px 0 8px" }}>
+            <canvas ref={canvasRef} width={520} height={100} style={{ width: "100%", borderRadius: 8, border: `1px solid ${D.border}`, marginBottom: 10 }} />
+            <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 12 }}>
+              {harmonics.map((h, i) => (
+                <div key={i} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{ fontSize: 11, color: D.muted, width: 150 }}>{labels[i]}</span>
+                  <input type="range" min={0} max={1} step={0.1} value={h}
+                    onChange={e => setHarmonics(prev => prev.map((v, j) => j === i ? +e.target.value : v))}
+                    style={{ flex: 1 }} />
+                  <span style={{ fontSize: 11, color: h > 0 ? "#EF9F27" : D.hint, width: 28 }}>{h.toFixed(1)}</span>
+                </div>
+              ))}
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+              <span style={{ fontSize: 12, color: D.muted }}>BPM</span>
+              <input type="range" min={60} max={160} step={1} value={bpm} onChange={e => setBpm(+e.target.value)} style={{ flex: 1 }} />
+              <span style={{ fontSize: 12, color: D.text, width: 36 }}>{bpm}</span>
+            </div>
+            <div style={{ padding: "8px 12px", background: D.surface2, borderRadius: 8, border: `1px solid ${D.border}`, fontSize: 12, display: "flex", gap: 16, flexWrap: "wrap" }}>
+              <span><span style={{ color: D.muted }}>1 step </span><span style={{ color: "#EF9F27" }}>{(60000 / bpm / 4).toFixed(1)}ms</span></span>
+              <span><span style={{ color: D.muted }}>1 bar </span><span style={{ color: "#EF9F27" }}>{(60000 / bpm).toFixed(1)}ms</span></span>
+              <span><span style={{ color: D.muted }}>16 bars </span><span style={{ color: "#EF9F27" }}>{(60000 / bpm * 16).toFixed(0)}ms</span></span>
+              <span><span style={{ color: D.muted }}>A4 </span><span style={{ color: "#EF9F27" }}>440 Hz</span></span>
+            </div>
+          </div>
+        );
+      }
+
+      const VISUALS = [Stage1Visual, Stage2Visual, Stage3Visual, Stage4Visual, Stage5Visual];
+
+      const INTROS = [
+        `Music is math in disguise. Every note is just a frequency — a number of vibrations per second (Hz).
+
+The chromatic scale has 12 semitones. Each semitone multiplies frequency by ²¹²√2 ≈ 1.0595. An octave (12 semitones) doubles it exactly.
+
+Click any key above to see its Hz formula: freq = 220 × 2^(octave−3 + semitone/12)
+
+Exercise: A3 = 220 Hz. Without a calculator, estimate A5 in Hz. What's the pattern?`,
+        `Two notes sound consonant when their frequencies form a simple ratio.
+
+A perfect 5th = ratio 3:2. The waves lock into a repeating pattern every 2–3 cycles — your ear hears it as "stable." A minor 2nd = 16:15 — the waves barely align, creating beats and tension.
+
+Try the Perfect 5th above, then the Minor 2nd. Watch how the wave shapes relate.
+
+Exercise: Which interval has ratio 2:1? How many semitones is that? Why does it sound "same but higher"?`,
+        `A chord is just a list of semitone offsets from a root note.
+
+Am = root + [0, 3, 7]. Major = root + [0, 4, 7]. The shape is always the same — only the root rotates around the clock.
+
+This is exactly how The Mountain stores chords: Am7 = [0, 3, 7, 10]. One array, any root.
+
+Exercise: The Mountain uses Am, G, C, F. Using the clock above, find all four roots and identify what chord type (major/minor) each is.`,
+        `A bar has 16 steps. Each step is one sixteenth note. Rhythm is just a set of step numbers.
+
+Uniform 8ths = {0,2,4,6,8,10,12,14} — even gaps of 2.
+Fibonacci = {0,1,2,4,7,12} — gaps follow 1,1,2,3,5. Dense at the front, sparse at the end. This is Bach mode in The Mountain: it breathes.
+
+Toggle the patterns above and feel the difference.
+
+Exercise: At 110 BPM, how long is one step in ms? How long is the full 16-bar grid?`,
+        `Sound is a wave. A pure sine wave is one frequency. Real instruments stack harmonics — integer multiples of a fundamental.
+
+Add harmonics with the sliders above. A sine alone sounds pure. Add the 2nd harmonic (octave) and it thickens. Add the 3rd (fifth up) and it brightens. This is how The Mountain's synth is built: OscillatorNode at a pentatonic frequency, shaped with a GainNode envelope.
+
+Exercise: Set BPM to 120. What is 1 step in ms? What about at 60 BPM? What's the relationship?`,
+      ];
+
+      const SYSTEM = `You are a music math tutor teaching someone to understand the mathematical foundations of music, targeting the cognitive load of "The Mountain" music sequencer.
+
+The Mountain uses: pentatonic scales, chord progressions (Am/G/C/F families), 7th extensions, Fibonacci rhythm indexing, Web Audio API synthesis (OscillatorNode, GainNode), frequency ratios, BPM to ms conversion.
+
+Stages:
+1. Numbers & Notes — chromatic scale, semitones as integers, freq formula: f = 220 × 2^(octave-3 + semitone/12)
+2. Intervals & Ratios — consonance as frequency ratios, perfect 5th (3:2), octave (2:1), pentatonic
+3. Chords as Vectors — chord = semitone offset list, Am=[0,3,7], 7th extensions, Mountain chord progressions
+4. Rhythm & Fibonacci — 16 steps per bar, BPM to ms math, Fibonacci offsets [0,1,2,4,7,12]
+5. Synthesis & Hz Math — sine waves, harmonics, BPM step timing, Web Audio building blocks
+
+Current stage: {STAGE_TITLE} (Stage {STAGE_NUM} of 5)
+
+Rules:
+- SHORT responses (3-5 sentences). ONE exercise at a time.
+- Connect to The Mountain's actual design when relevant.
+- Be physical in language ("the waves lock together", "the gap breathes").
+- Use triple backticks for code.
+- When checking answers: confirm or correct in 1-2 sentences, then advance.`;
+
+      function App() {
+        const [stage, setStage] = useState(0);
+        const [messages, setMessages] = useState([{ role: "assistant", content: INTROS[0] }]);
+        const [input, setInput] = useState("");
+        const [loading, setLoading] = useState(false);
+        const bottomRef = useRef(null);
+        const Visual = VISUALS[stage];
+        const s = STAGES[stage];
+
+        useEffect(() => { bottomRef.current && bottomRef.current.scrollIntoView({ behavior: "smooth" }); }, [messages]);
+
+        const systemPrompt = SYSTEM
+          .replace("{STAGE_TITLE}", s.title)
+          .replace("{STAGE_NUM}", stage + 1);
+
+        async function send(override) {
+          const text = (override !== undefined ? override : input).trim();
+          if (!text || loading) return;
+          setInput("");
+          const newMessages = [...messages, { role: "user", content: text }];
+          setMessages(newMessages);
+          setLoading(true);
+          const advance = /\b(next|advance|next stage|move on)\b/i.test(text);
+          try {
+            const res = await fetch("https://api.anthropic.com/v1/messages", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                model: "claude-sonnet-4-20250514",
+                max_tokens: 1000,
+                system: systemPrompt,
+                messages: newMessages.map(m => ({ role: m.role, content: m.content })),
+              }),
+            });
+            const data = await res.json();
+            const reply = data.content && data.content[0] && data.content[0].text ? data.content[0].text : "Something went wrong.";
+            let ns = stage;
+            if (advance && stage < 4) ns = stage + 1;
+            setMessages(p => [...p, { role: "assistant", content: reply }]);
+            if (ns !== stage) {
+              setTimeout(() => {
+                setStage(ns);
+                setMessages(p => [...p, { role: "assistant", content: INTROS[ns], stageChange: true, stageNum: ns }]);
+              }, 350);
+            }
+          } catch (e) {
+            setMessages(p => [...p, { role: "assistant", content: "Network error — try again." }]);
+          }
+          setLoading(false);
+        }
+
+        function goToStage(i) { setStage(i); setMessages([{ role: "assistant", content: INTROS[i] }]); }
+
+        function renderContent(text) {
+          const parts = []; const re = /```(\w+)?\n?([\s\S]*?)```/g;
+          let last = 0, m;
+          while ((m = re.exec(text)) !== null) {
+            if (m.index > last) parts.push({ type: "text", content: text.slice(last, m.index) });
+            parts.push({ type: "code", content: m[2] });
+            last = m.index + m[0].length;
+          }
+          if (last < text.length) parts.push({ type: "text", content: text.slice(last) });
+          return parts.map((p, i) =>
+            p.type === "code"
+              ? <pre key={i} style={{ background: "#050508", border: `1px solid ${D.border}`, borderRadius: 8, padding: "10px 13px", margin: "8px 0", fontFamily: "var(--font-mono)", fontSize: 12, lineHeight: 1.65, overflowX: "auto", color: "#c9d1e8" }}>{p.content}</pre>
+              : <span key={i} style={{ whiteSpace: "pre-wrap" }}>{p.content}</span>
+          );
+        }
+
+        return (
+          <div style={{ display: "flex", flexDirection: "column", height: 780, background: D.bg, color: D.text, fontFamily: "var(--font-sans)", borderRadius: 12, overflow: "hidden", border: `1px solid ${D.border}` }}>
+            <div style={{ padding: "10px 14px 0", borderBottom: `1px solid ${D.border}` }}>
+              <div style={{ display: "flex", gap: 5, flexWrap: "wrap", marginBottom: 10 }}>
+                {STAGES.map((st, i) => (
+                  <button key={i} onClick={() => goToStage(i)} style={{
+                    padding: "4px 11px", borderRadius: 20, fontSize: 11, cursor: "pointer",
+                    background: i === stage ? st.color : D.surface2,
+                    color: i === stage ? "#fff" : D.muted,
+                    border: i === stage ? "none" : `1px solid ${D.border}`,
+                    fontWeight: i === stage ? 500 : 400,
+                  }}>{i + 1}. {st.title}</button>
+                ))}
+              </div>
+            </div>
+
+            <div style={{ padding: "0 14px", borderBottom: `1px solid ${D.border}`, background: D.surface }}>
+              <Visual />
+            </div>
+
+            <div style={{ flex: 1, overflowY: "auto", padding: "14px 14px 0" }}>
+              {messages.map((m, i) => (
+                <div key={i} style={{ marginBottom: 12, display: "flex", flexDirection: "column", alignItems: m.role === "user" ? "flex-end" : "flex-start" }}>
+                  {m.stageChange && (
+                    <div style={{ alignSelf: "center", fontSize: 11, color: D.hint, padding: "4px 12px", marginBottom: 6 }}>
+                      ── Stage {m.stageNum + 1}: {STAGES[m.stageNum].title} ──
+                    </div>
+                  )}
+                  <div style={{
+                    maxWidth: "92%",
+                    background: m.role === "user" ? s.color : D.surface,
+                    color: m.role === "user" ? "#fff" : D.text,
+                    borderRadius: m.role === "user" ? "13px 13px 4px 13px" : "13px 13px 13px 4px",
+                    padding: "9px 13px", fontSize: 13, lineHeight: 1.7,
+                    border: m.role === "assistant" ? `1px solid ${D.border}` : "none",
+                  }}>
+                    {renderContent(m.content)}
+                  </div>
+                </div>
+              ))}
+              {loading && (
+                <div style={{ marginBottom: 12 }}>
+                  <div style={{ display: "inline-block", background: D.surface, border: `1px solid ${D.border}`, borderRadius: "13px 13px 13px 4px", padding: "9px 13px", fontSize: 12, color: D.muted }}>thinking...</div>
+                </div>
+              )}
+              <div ref={bottomRef} />
+            </div>
+
+            <div style={{ padding: "6px 14px 0", display: "flex", gap: 5, flexWrap: "wrap" }}>
+              {["Give me a hint", "Show me the answer", "Next stage →"].map(q => (
+                <button key={q} onClick={() => send(q)} style={{
+                  padding: "3px 10px", borderRadius: 14, fontSize: 11, cursor: "pointer",
+                  background: D.surface2, color: D.muted, border: `1px solid ${D.border}`,
+                }}>{q}</button>
+              ))}
+            </div>
+
+            <div style={{ padding: 10, display: "flex", gap: 8, alignItems: "center" }}>
+              <input type="text" value={input} onChange={e => setInput(e.target.value)}
+                onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); send(); } }}
+                placeholder="Type your answer or question..."
+                style={{
+                  flex: 1, fontFamily: "var(--font-mono)", fontSize: 13, padding: "8px 12px", height: 38,
+                  background: D.surface2, border: `1px solid ${D.border}`,
+                  borderRadius: 10, color: D.text, outline: "none",
+                }} />
+              <button onClick={() => send()} disabled={loading || !input.trim()} style={{
+                padding: "8px 16px", borderRadius: 10, height: 38, cursor: "pointer",
+                background: input.trim() ? s.color : D.surface2,
+                color: input.trim() ? "#fff" : D.hint,
+                border: "none", fontSize: 13, fontWeight: 500,
+              }}>Send</button>
+            </div>
+          </div>
+        );
+      }
+
+      const root = ReactDOM.createRoot(document.getElementById("root"));
+      root.render(React.createElement(App));
+    </script>
+  </body>
+</html>
